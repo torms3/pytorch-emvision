@@ -70,10 +70,10 @@ class UpBlock(nn.Module):
 
 
 class RSUNet(nn.Module):
-    def __init__(self, depth=4):
+    def __init__(self, width=width):
         super(RSUNet, self).__init__()
-        assert depth < len(width)
-        self.depth = depth
+        assert len(width) > 1
+        depth = len(width) - 1
 
         # InputBlock.
         self.iconv = ConvBlock(width[0], width[0])

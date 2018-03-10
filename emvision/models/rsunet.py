@@ -4,7 +4,7 @@ import torch.nn as nn
 from . import utils
 
 
-width = [16,32,64,128,256,512]
+__all__ = ['RSUNet']
 
 
 def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
@@ -69,6 +69,9 @@ class UpBlock(nn.Module):
         return self.up(x) + skip
 
 
+width = [16,32,64,128,256,512]
+
+
 class RSUNet(nn.Module):
     def __init__(self, width=width):
         super(RSUNet, self).__init__()
@@ -108,7 +111,6 @@ class RSUNet(nn.Module):
             x = uconv(x, skip.pop())
 
         return x
-
 
     def init_weights(self):
         for m in self.modules():

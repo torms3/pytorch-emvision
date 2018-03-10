@@ -48,8 +48,8 @@ class UpBlock(nn.Module):
     def __init__(self, in_channels, out_channels, up=(1,2,2)):
         super(UpBlock, self).__init__()
         self.up = nn.Sequential(
-            nn.Upsample(scale_factor=up, mode='trilinear')),
-            conv(in_channels, out_channels, kernel_size=1))
+            nn.Upsample(scale_factor=up, mode='trilinear'),
+            conv(in_channels, out_channels, kernel_size=1),
         )
 
     def forward(self, x, skip):

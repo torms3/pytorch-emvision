@@ -2,6 +2,7 @@ from setuptools import setup, find_packages
 
 
 requirements = [
+    'nose',
     'numpy',
     'torch',
 ]
@@ -18,6 +19,9 @@ setup(
 
     # Package info
     packages=find_packages(exclude=('test',)),
+
+    # Test suite
+    test_suite='nose.collector',
 
     zip_safe=True,
     install_requires=requirements,

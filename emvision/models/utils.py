@@ -1,4 +1,5 @@
 import collections
+from itertools import repeat
 
 
 def _ntuple(n):

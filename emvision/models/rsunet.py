@@ -1,5 +1,8 @@
+import math
 import torch
 import torch.nn as nn
+from torch.nn import functional as F
+from torch.autograd import Variable
 
 from . import utils
 
@@ -86,6 +89,17 @@ class UpBlock(nn.Module):
         return self.up(x) + skip
 
 
+class UpConvBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, up=(1,2,2)):
+        super(UpConvBlock, self).__init__()
+        self.up = UpBlock(in_channels, out_channels, up=up)
+        self.conv = ConvBlock(out_channels, out_channels)
+
+    def forward(self, x, skip):
+        x = self.up(x, skip)
+        return self.conv(x)
+
+
 width = [16,32,64,128,256,512]
 
 
@@ -105,8 +119,7 @@ class RSUNet(nn.Module):
                                              ConvBlock(width[d], width[d+1])))
         self.uconvs = nn.ModuleList()
         for d in reversed(range(depth)):
-            self.uconvs.append(nn.Sequential(UpBlock(width[d+1], width[d]),
-                                             ConvBlock(width[d], width[d])))
+            self.uconvs.append(UpConvBlock(width[d+1], width[d]))
 
         self.out_channels = width[0]
 
@@ -132,3 +145,11 @@ class RSUNet(nn.Module):
             elif isinstance(m, nn.BatchNorm3d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
+
+
+def test():
+    net = RSUNet(width=[3,4,5,6])
+    y = net(Variable(torch.randn(1,3,20,256,256)))
+    print(y.size())
+
+# test()

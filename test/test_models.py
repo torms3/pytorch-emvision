@@ -7,7 +7,11 @@ class Tester(unittest.TestCase):
 
     def test_rsunet(self):
         from emvision.models import RSUNet
-        model = RSUNet()
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        net = RSUNet(width=[3,4,5,6]).to(device)
+        x = torch.randn(1,3,20,256,256).to(device)
+        y = net(x)
+        print(y.size())
 
 
 if __name__ == '__main__':

@@ -107,10 +107,10 @@ class RSUNet(nn.Module):
     def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight.data, nonlinearity='relu')
             elif isinstance(m, nn.BatchNorm3d):
-                m.weight.fill_(1)
-                m.bias.zero_()
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
 
 
 def test():

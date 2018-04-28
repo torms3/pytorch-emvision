@@ -24,7 +24,6 @@ def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
 class GNReLUConv(nn.Sequential):
     def __init__(self, in_channels, out_channels, kernel_size=3):
         super(GNReLUConv, self).__init__()
-        print(G)
         self.add_module('norm', nn.GroupNorm(in_channels//G, in_channels))
         self.add_module('relu', nn.ReLU(inplace=True))
         self.add_module('conv', conv(in_channels, out_channels,

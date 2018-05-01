@@ -21,11 +21,17 @@ def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
                      stride=stride, padding=padding, bias=bias)
 
 
+class GNReLU(nn.Sequential):
+    def __init__(self, in_channels):
+        super(GNReLU, self).__init__()
+        self.add_module('norm', nn.GroupNorm(in_channels//G, in_channels))
+        self.add_module('relu', nn.ReLU(inplace=True))
+
+
 class GNReLUConv(nn.Sequential):
     def __init__(self, in_channels, out_channels, kernel_size=3):
         super(GNReLUConv, self).__init__()
-        self.add_module('norm', nn.GroupNorm(in_channels//G, in_channels))
-        self.add_module('relu', nn.ReLU(inplace=True))
+        self.add_module('norm_relu', GNReLU(in_channels))
         self.add_module('conv', conv(in_channels, out_channels,
                                      kernel_size=kernel_size))
 
@@ -99,6 +105,8 @@ class RSUNet(nn.Module):
         for d in reversed(range(depth)):
             self.uconvs.append(UpConvBlock(width[d+1], width[d]))
 
+        self.final = GNReLU(width[0])
+
         self.init_weights()
 
     def forward(self, x):
@@ -112,12 +120,12 @@ class RSUNet(nn.Module):
         for uconv in self.uconvs:
             x = uconv(x, skip.pop())
 
-        return x
+        return self.final(x)
 
     def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                nn.init.kaiming_normal_(m.weight.data, nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
             elif isinstance(m, nn.GroupNorm):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)

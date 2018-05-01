@@ -11,7 +11,7 @@ class Tester(unittest.TestCase):
         net = RSUNet(width=[3,4,5,6]).to(device)
         x = torch.randn(1,3,20,256,256).to(device)
         y = net(x)
-        print(y.size())
+        # print(y.size())
 
     def test_rsunet_gn(self):
         from emvision.models import rsunet_gn
@@ -19,12 +19,12 @@ class Tester(unittest.TestCase):
         net = rsunet_gn(width=[2,4,6,8], group=2).to(device)
         x = torch.randn(1,2,20,256,256).to(device)
         y = net(x)
-        print(y.size())
+        # print(y.size())
 
 
 if __name__ == '__main__':
     print('torch version =', torch.__version__)
-    print('cuda version =', torch.version.cuda)
+    print('cuda  version =', torch.version.cuda)
     print('cudnn version =', torch.backends.cudnn.version())
     print('cuda available?', torch.cuda.is_available())
     unittest.main()

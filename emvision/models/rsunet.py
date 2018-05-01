@@ -14,11 +14,17 @@ def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
                      stride=stride, padding=padding, bias=bias)
 
 
+class BNReLU(nn.Sequential):
+    def __init__(self, in_channels):
+        super(BNReLU, self).__init__()
+        self.add_module('norm', nn.BatchNorm3d(in_channels))
+        self.add_module('relu', nn.ReLU(inplace=True))
+
+
 class BNReLUConv(nn.Sequential):
     def __init__(self, in_channels, out_channels, kernel_size=3):
         super(BNReLUConv, self).__init__()
-        self.add_module('norm', nn.BatchNorm3d(in_channels))
-        self.add_module('relu', nn.ReLU(inplace=True))
+        self.add_module('norm_relu', BNReLU(in_channels))
         self.add_module('conv', conv(in_channels, out_channels,
                                      kernel_size=kernel_size))
 
@@ -89,6 +95,8 @@ class RSUNet(nn.Module):
         for d in reversed(range(depth)):
             self.uconvs.append(UpConvBlock(width[d+1], width[d]))
 
+        self.final = BNReLU(width[0])
+
         self.init_weights()
 
     def forward(self, x):
@@ -102,12 +110,12 @@ class RSUNet(nn.Module):
         for uconv in self.uconvs:
             x = uconv(x, skip.pop())
 
-        return x
+        return self.final(x)
 
     def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                nn.init.kaiming_normal_(m.weight.data, nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
             elif isinstance(m, nn.BatchNorm3d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)

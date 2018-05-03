@@ -1,2 +1,3 @@
 from .rsunet import *
 from .rsunet_gn import *
+from . import rsunet_v3

@@ -5,14 +5,7 @@ from . import utils
 from . import layers
 
 
-__all__ = ['rsunet_gn']
-
-
-width = [16,32,64,128,256,512]
-
-
-def rsunet_gn(width=width, group=16):
-    return RSUNet(width, group)
+__all__ = ['RSUNet']
 
 
 def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
@@ -21,17 +14,11 @@ def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
                      stride=stride, padding=padding, bias=bias)
 
 
-class GNReLU(nn.Sequential):
-    def __init__(self, in_channels):
-        super(GNReLU, self).__init__()
-        self.add_module('norm', nn.GroupNorm(in_channels//G, in_channels))
-        self.add_module('relu', nn.ReLU(inplace=True))
-
-
-class GNReLUConv(nn.Sequential):
+class BNReLUConv(nn.Sequential):
     def __init__(self, in_channels, out_channels, kernel_size=3):
-        super(GNReLUConv, self).__init__()
-        self.add_module('norm_relu', GNReLU(in_channels))
+        super(BNReLUConv, self).__init__()
+        self.add_module('norm', nn.BatchNorm3d(in_channels))
+        self.add_module('relu', nn.ReLU(inplace=True))
         self.add_module('conv', conv(in_channels, out_channels,
                                      kernel_size=kernel_size))
 
@@ -39,8 +26,8 @@ class GNReLUConv(nn.Sequential):
 class ResBlock(nn.Module):
     def __init__(self, channels):
         super(ResBlock, self).__init__()
-        self.conv1 = GNReLUConv(channels, channels)
-        self.conv2 = GNReLUConv(channels, channels)
+        self.conv1 = BNReLUConv(channels, channels)
+        self.conv2 = BNReLUConv(channels, channels)
 
     def forward(self, x):
         residual = x
@@ -53,9 +40,9 @@ class ResBlock(nn.Module):
 class ConvBlock(nn.Sequential):
     def __init__(self, in_channels, out_channels):
         super(ConvBlock, self).__init__()
-        self.add_module('pre',  GNReLUConv(in_channels, out_channels))
+        self.add_module('pre',  BNReLUConv(in_channels, out_channels))
         self.add_module('res',  ResBlock(out_channels))
-        self.add_module('post', GNReLUConv(out_channels, out_channels))
+        self.add_module('post', BNReLUConv(out_channels, out_channels))
 
 
 class UpBlock(nn.Module):
@@ -82,17 +69,16 @@ class UpConvBlock(nn.Module):
         return self.conv(x)
 
 
-G = 16
+width = [16,32,64,128,256,512]
 
 
 class RSUNet(nn.Module):
-    def __init__(self, width, group):
+    def __init__(self, width=width):
         super(RSUNet, self).__init__()
         assert len(width) > 1
         depth = len(width) - 1
 
-        global G
-        G = group
+        self.in_channels = width[0]
 
         self.iconv = ConvBlock(width[0], width[0])
 
@@ -100,12 +86,11 @@ class RSUNet(nn.Module):
         for d in range(depth):
             self.dconvs.append(nn.Sequential(nn.MaxPool3d((1,2,2)),
                                              ConvBlock(width[d], width[d+1])))
-
         self.uconvs = nn.ModuleList()
         for d in reversed(range(depth)):
             self.uconvs.append(UpConvBlock(width[d+1], width[d]))
 
-        self.final = GNReLU(width[0])
+        self.out_channels = width[0]
 
         self.init_weights()
 
@@ -120,9 +105,9 @@ class RSUNet(nn.Module):
         for uconv in self.uconvs:
             x = uconv(x, skip.pop())
 
-        return self.final(x)
+        return x
 
     def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight)

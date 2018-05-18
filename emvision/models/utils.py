@@ -1,4 +1,5 @@
 import collections
+import operator
 from itertools import repeat
 
 
@@ -14,6 +15,23 @@ def _ntuple(n):
 
 _triple = _ntuple(3)
 
+def sum3(x,y):
+    return (x[0]+y[0], x[1]+y[1], x[2]+y[2])
+
+def mul3(x,y):
+    return (x[0]*y[0], x[1]*y[1], x[2]*y[2])
+
+def div3(x,y):
+    return (x[0]//y[0], x[1]//y[1], x[2]//y[2])
+
+def residual_sum(x, skip, margin, residual):
+    return x + crop3d(skip, margin) if residual else x
+
+def crop3d(x, margin):
+    shape = x.size()
+    index3d = tuple(slice(b,e-b) for (b,e) in zip(margin,shape[-3:]))
+    index = tuple(slice(0,e) for e in shape[:-3]) + index3d
+    return x[index]
 
 def pad_size(kernel_size, mode):
     assert mode in ['valid', 'same', 'full']

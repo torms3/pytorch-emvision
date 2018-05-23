@@ -10,19 +10,22 @@ class BilinearUp(nn.Module):
 
     Currently everything's hardcoded and only supports upsampling factor of 2.
     """
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, factor=(1,2,2)):
         super(BilinearUp, self).__init__()
         assert in_channels==out_channels
         self.groups = in_channels
+        self.factor = factor
+        self.kernel_size = [(2 * f) - (f % 2) for f in self.factor]
+        self.padding = [int(math.ceil((f - 1) / 2.0)) for f in factor]
         self.init_weights()
 
     def forward(self, x):
         return F.conv_transpose3d(x, self.weight,
-            stride=(1,2,2), padding=(0,1,1), groups=self.groups
+            stride=self.factor, padding=self.padding, groups=self.groups
         )
 
     def init_weights(self):
-        weight = torch.Tensor(self.groups, 1, 1, 4, 4)
+        weight = torch.Tensor(self.groups, 1, *self.kernel_size)
         width = weight.size(-1)
         hight = weight.size(-2)
         assert width==hight

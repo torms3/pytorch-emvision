@@ -56,7 +56,7 @@ class UpBlock(nn.Module):
         super(UpBlock, self).__init__()
         self.up = nn.Sequential(
             # nn.Upsample(scale_factor=up, mode='trilinear'),
-            layers.BilinearUp(in_channels, in_channels),
+            layers.BilinearUp(in_channels, in_channels, factor=up),
             conv(in_channels, out_channels, kernel_size=1),
         )
 

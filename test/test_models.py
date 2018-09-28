@@ -24,7 +24,7 @@ class Tester(unittest.TestCase):
     def test_rsunet_act(self):
         from emvision.models import rsunet_act
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        net = rsunet_act(width=[2,4,6,8], act='PReLU').to(device)
+        net = rsunet_act(width=[3,4,5,6], act='PReLU').to(device)
         x = torch.randn(1,3,20,256,256).to(device)
         y = net(x)
         # print(y.size())

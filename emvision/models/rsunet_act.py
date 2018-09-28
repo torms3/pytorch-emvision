@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.nn import functional as F
 
 from . import utils
 from . import layers
@@ -10,11 +11,19 @@ __all__ = ['rsunet_act']
 
 width = [16,32,64,128,256,512]
 nonlinearity = 'ReLU'
+params = {}
+
+
+def set_nonlinearity(act):
+    global nonlinearity, params
+    nonlinearity = act
+    # Use in-place module if available.
+    if hasattr(F, nonlinearity.lower() + '_'):
+        params['inplace'] = True
 
 
 def rsunet_act(width=width, act='ReLU'):
-    global nonlinearity
-    nonlinearity = act
+    set_nonlinearity(act)
     return RSUNet(width)
 
 
@@ -25,10 +34,10 @@ def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
 
 
 class BNAct(nn.Sequential):
-    def __init__(self, in_channels, act='relu'):
+    def __init__(self, in_channels):
         super(BNAct, self).__init__()
         self.add_module('norm', nn.BatchNorm3d(in_channels))
-        self.add_module('act', getattr(nn, nonlinearity)(inplace=True))
+        self.add_module('act', getattr(nn, nonlinearity)(**params))
 
 
 class BNActConv(nn.Sequential):
@@ -86,7 +95,7 @@ class UpConvBlock(nn.Module):
 
 
 class RSUNet(nn.Module):
-    def __init__(self, width=width, act='relu'):
+    def __init__(self, width=width):
         super(RSUNet, self).__init__()
         assert len(width) > 1
         depth = len(width) - 1

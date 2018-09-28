@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.nn import functional as F
 
 from . import utils
 from . import layers
@@ -10,11 +11,20 @@ __all__ = ['rsunet_act_gn']
 
 width = [16,32,64,128,256,512]
 nonlinearity = 'ReLU'
+params = {}
+G = 16
+
+
+def set_nonlinearity(act):
+    global nonlinearity, params
+    nonlinearity = act
+    # Use in-place module if available.
+    if hasattr(F, nonlinearity.lower() + '_'):
+        params['inplace'] = True
 
 
 def rsunet_act_gn(width=width, group=16, act='ReLU'):
-    global nonlinearity
-    nonlinearity = act
+    set_nonlinearity(act)
     return RSUNet(width, group)
 
 
@@ -28,7 +38,7 @@ class GNAct(nn.Sequential):
     def __init__(self, in_channels):
         super(GNAct, self).__init__()
         self.add_module('norm', nn.GroupNorm(in_channels//G, in_channels))
-        self.add_module('act', getattr(nn, nonlinearity)(inplace=True))
+        self.add_module('act', getattr(nn, nonlinearity)(**params))
 
 
 class GNActConv(nn.Sequential):
@@ -83,9 +93,6 @@ class UpConvBlock(nn.Module):
     def forward(self, x, skip):
         x = self.up(x, skip)
         return self.conv(x)
-
-
-G = 16
 
 
 class RSUNet(nn.Module):

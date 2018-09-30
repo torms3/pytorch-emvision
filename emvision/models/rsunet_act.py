@@ -19,6 +19,7 @@ def set_nonlinearity(act, **act_params):
     nonlinearity = act
 
     global params
+    params = {}
     params.update(act_params)
     # Use in-place module if available.
     if nonlinearity in ['LeakyReLU','ReLU','ELU']:

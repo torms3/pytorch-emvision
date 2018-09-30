@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
 
 from . import utils
 from . import layers
@@ -16,13 +15,13 @@ params = {}
 
 def set_nonlinearity(act, **act_params):
     global nonlinearity
-    assert hasattr(nn, act)
+    assert act in ['LeakyReLU','PReLU','ELU','ReLU']
     nonlinearity = act
 
     global params
     params.update(act_params)
     # Use in-place module if available.
-    if hasattr(F, nonlinearity.lower() + '_'):
+    if nonlinearity in ['LeakyReLU','PReLU','ELU']
         params['inplace'] = True
 
 
@@ -135,7 +134,7 @@ class RSUNet(nn.Module):
     def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                if nonlinearity == 'Leaky_ReLU':
+                if nonlinearity == 'LeakyReLU':
                     nn.init.kaiming_normal_(
                         m.weight,
                         nonlinearity='leaky_relu',

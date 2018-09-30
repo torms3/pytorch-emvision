@@ -40,7 +40,7 @@ class Tester(unittest.TestCase):
     def test_rsunet_leaky_relu(self):
         from emvision.models import rsunet_act
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        net = rsunet_act(width=[3,4,5,6], act='Leaky_ReLU', negative_slope=0.1).to(device)
+        net = rsunet_act(width=[3,4,5,6], act='LeakyReLU', negative_slope=0.1).to(device)
         x = torch.randn(1,3,20,256,256).to(device)
         y = net(x)
         # print(y.size())
@@ -48,7 +48,7 @@ class Tester(unittest.TestCase):
     def test_rsunet_leaky_relu_gn(self):
         from emvision.models import rsunet_act_gn
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        net = rsunet_act_gn(width=[2,4,6,8], group=2, act='Leaky_ReLU', negative_slope=0.1).to(device)
+        net = rsunet_act_gn(width=[2,4,6,8], group=2, act='LeakyReLU', negative_slope=0.1).to(device)
         x = torch.randn(1,2,20,256,256).to(device)
         y = net(x)
         # print(y.size())

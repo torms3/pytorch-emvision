@@ -15,16 +15,20 @@ params = {}
 G = 16
 
 
-def set_nonlinearity(act):
-    global nonlinearity, params
+def set_nonlinearity(act, **act_params):
+    global nonlinearity
+    assert hasattr(nn, nonlinearity)
     nonlinearity = act
+
+    global params
+    params.update(act_params)
     # Use in-place module if available.
     if hasattr(F, nonlinearity.lower() + '_'):
         params['inplace'] = True
 
 
-def rsunet_act_gn(width=width, group=16, act='ReLU'):
-    set_nonlinearity(act)
+def rsunet_act_gn(width=width, group=16, act='ReLU', **act_params):
+    set_nonlinearity(act, **act_params)
     return RSUNet(width, group)
 
 
@@ -135,4 +139,17 @@ class RSUNet(nn.Module):
     def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+                if nonlinearity == 'Leaky_ReLU':
+                    nn.init.kaiming_normal_(
+                        m.weight,
+                        nonlinearity='leaky_relu',
+                        a=params['negative_slope'] if 'negative_slope' in params else 0.01
+                    )
+                elif nonlinearity == 'PReLU':
+                    nn.init.kaiming_normal_(
+                        m.weight,
+                        nonlinearity='leaky_relu',
+                        a=params['init'] if 'init' in params else 0.25
+                    )
+                else:
+                    nn.init.kaiming_normal_(m.weight, nonlinearity='relu')

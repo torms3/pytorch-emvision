@@ -21,18 +21,50 @@ class Tester(unittest.TestCase):
         y = net(x)
         # print(y.size())
 
-    def test_rsunet_act(self):
+    def test_rsunet_prelu(self):
         from emvision.models import rsunet_act
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        net = rsunet_act(width=[3,4,5,6], act='PReLU').to(device)
+        net = rsunet_act(width=[3,4,5,6], act='PReLU', init=0.1).to(device)
         x = torch.randn(1,3,20,256,256).to(device)
         y = net(x)
         # print(y.size())
 
-    def test_rsunet_act_gn(self):
+    def test_rsunet_prelu_gn(self):
         from emvision.models import rsunet_act_gn
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        net = rsunet_act_gn(width=[2,4,6,8], group=2, act='PReLU').to(device)
+        net = rsunet_act_gn(width=[2,4,6,8], group=2, act='PReLU', init=0.1).to(device)
+        x = torch.randn(1,2,20,256,256).to(device)
+        y = net(x)
+        # print(y.size())
+
+    def test_rsunet_leaky_relu(self):
+        from emvision.models import rsunet_act
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        net = rsunet_act(width=[3,4,5,6], act='Leaky_ReLU', negative_slope=0.1).to(device)
+        x = torch.randn(1,3,20,256,256).to(device)
+        y = net(x)
+        # print(y.size())
+
+    def test_rsunet_leaky_relu_gn(self):
+        from emvision.models import rsunet_act_gn
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        net = rsunet_act_gn(width=[2,4,6,8], group=2, act='Leaky_ReLU', negative_slope=0.1).to(device)
+        x = torch.randn(1,2,20,256,256).to(device)
+        y = net(x)
+        # print(y.size())
+
+    def test_rsunet_elu(self):
+        from emvision.models import rsunet_act
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        net = rsunet_act(width=[3,4,5,6], act='ELU').to(device)
+        x = torch.randn(1,3,20,256,256).to(device)
+        y = net(x)
+        # print(y.size())
+
+    def test_rsunet_elu_gn(self):
+        from emvision.models import rsunet_act_gn
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        net = rsunet_act_gn(width=[2,4,6,8], group=2, act='ELU').to(device)
         x = torch.randn(1,2,20,256,256).to(device)
         y = net(x)
         # print(y.size())

@@ -17,7 +17,7 @@ G = 16
 
 def set_nonlinearity(act, **act_params):
     global nonlinearity
-    assert hasattr(nn, nonlinearity)
+    assert hasattr(nn, act)
     nonlinearity = act
 
     global params

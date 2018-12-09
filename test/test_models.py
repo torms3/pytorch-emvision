@@ -85,6 +85,14 @@ class Tester(unittest.TestCase):
         y = net(x)
         # print(y.size())
 
+    def test_vrunet(self):
+        from emvision.models import vrunet
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        net = vrunet(width=[2,4,6,8]).to(device)
+        x = torch.randn(1,2,38,256,256).to(device)
+        y = net(x)
+        print("VRUnet {} -> {}".format(x.size(), y.size()))
+
 
 if __name__ == '__main__':
     print('torch version =', torch.__version__)

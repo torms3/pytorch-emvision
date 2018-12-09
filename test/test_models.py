@@ -89,9 +89,10 @@ class Tester(unittest.TestCase):
         from emvision.models import vrunet
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         net = vrunet(width=[2,4,6,8]).to(device)
-        x = torch.randn(1,2,38,256,256).to(device)
+        x = torch.randn(1,2,48,148,148).to(device)
         y = net(x)
-        print("VRUnet {} -> {}".format(x.size(), y.size()))
+        # (48,148,148) -> (20,60,60)
+        print("VRUnet: {} -> {}".format(x.size(), y.size()))
 
 
 if __name__ == '__main__':

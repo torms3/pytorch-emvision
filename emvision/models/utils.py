@@ -42,11 +42,11 @@ def crop3d(x, margin):
 def crop3d_center(x, ref):
     xs = x.size()[-3:]
     rs = ref.size()[-3:]
-    assert all(xs >= rs for x,r in zip(xs,rs))
-    assert all((xs - rs) % 2 == 0 for x,r in zip(xs,rs))
+    assert all(x >= r for x,r in zip(xs,rs))
+    assert all((x - r) % 2 == 0 for x,r in zip(xs,rs))
     margin = [(x - r) // 2 for x,r in zip(xs,rs)]
     return crop3d(x, margin)
-    
+
 
 def pad_size(kernel_size, mode):
     assert mode in ['valid', 'same', 'full']

@@ -30,8 +30,7 @@ def set_nonlinearity(act, **act_params):
 def vrunet(width=width, mode='trilinear', scale_factor=(1,2,2), act='ReLU',
            **act_params):
     set_nonlinearity(act, **act_params)
-    set_upsample(mode, scale_factor)
-    return VRUNet(width)
+    return VRUNet(width, mode, scale_factor)
 
 
 def conv(in_channels, out_channels, mode, kernel_size=3, stride=1, bias=False):
@@ -102,7 +101,7 @@ class UpBlock(nn.Module):
         super(UpBlock, self).__init__()
         self.up = nn.Sequential(
             Upsample(mode, scale_factor),
-            conv(in_channels, out_channels, kernel_size=1),
+            conv(in_channels, out_channels, 'same', kernel_size=1),
         )
 
     def forward(self, x, skip):

@@ -94,6 +94,15 @@ class Tester(unittest.TestCase):
         # (48,148,148) -> (20,60,60)
         print("VRUnet: {} -> {}".format(x.size(), y.size()))
 
+    def test_vrunet_nearest(self):
+        from emvision.models import vrunet
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        net = vrunet(width=[2,4,6,8], mode='nearest').to(device)
+        x = torch.randn(1,2,48,148,148).to(device)
+        y = net(x)
+        # (48,148,148) -> (20,60,60)
+        print("VRUnet: {} -> {}".format(x.size(), y.size()))
+
 
 if __name__ == '__main__':
     print('torch version =', torch.__version__)

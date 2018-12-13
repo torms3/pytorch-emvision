@@ -107,7 +107,7 @@ class Tester(unittest.TestCase):
         from emvision.models import dynamic_rsunet
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         net = dynamic_rsunet(width=[2,4,6,8], unroll=3).to(device)
-        x = torch.randn(1,2,48,148,148).to(device)
+        x = torch.randn(1,2,20,256,256).to(device)
         y1 = net(x)
         y2 = net(x, unroll=1)
         y3 = net(x, unroll=2)

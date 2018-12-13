@@ -64,8 +64,8 @@ class BNActConv(nn.Module):
         self.norm_act = BNAct(in_channels)
         self.conv = conv(in_channels, out_channels, kernel_size=kernel_size)
 
-     def forward(self, x, unroll=1):
-         return self.conv(self.norm_act(x, unroll=unroll))
+    def forward(self, x, unroll=1):
+        return self.conv(self.norm_act(x, unroll=unroll))
 
 
 class ResBlock(nn.Module):

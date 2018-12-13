@@ -131,7 +131,7 @@ class UpConvBlock(nn.Module):
 
 class DynamicRSUNet(nn.Module):
     def __init__(self, width):
-        super(RSUNet, self).__init__()
+        super(DynamicRSUNet, self).__init__()
         assert len(width) > 1
         depth = len(width) - 1
 

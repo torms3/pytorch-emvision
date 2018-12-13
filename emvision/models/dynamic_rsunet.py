@@ -62,7 +62,7 @@ class BNActConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=3):
         super(BNActConv, self).__init__()
         self.norm_act = BNAct(in_channels)
-        self.conv = conv(in_channels, out_channels, kernel_size=kernel_size))
+        self.conv = conv(in_channels, out_channels, kernel_size=kernel_size)
 
      def forward(self, x, unroll=1):
          return self.conv(self.norm_act(x, unroll=unroll))

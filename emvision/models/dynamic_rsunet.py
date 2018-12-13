@@ -97,7 +97,7 @@ class ConvBlock(nn.Module):
 
 class DownConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, down=(1,2,2)):
-        super(UpConvBlock, self).__init__()
+        super(DownConvBlock, self).__init__()
         self.down = nn.MaxPool3d(down)
         self.conv = ConvBlock(in_channels, out_channels)
 

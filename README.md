@@ -1,2 +1,2 @@
 # pytorch-models
-PyTorch models.
+PyTorch models

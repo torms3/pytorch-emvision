@@ -129,6 +129,13 @@ class Tester(unittest.TestCase):
         y = net(x)
         # print(y.size())
 
+    def test_rsunet_zfactor(self):
+        from emvision.models import rsunet_act
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        net = rsunet_act(width=[3,4,5,6], zfactor=[1,2,2], act='ELU').to(device)
+        x = torch.randn(1,3,20,256,256).to(device)
+        y = net(x)
+
 
 if __name__ == '__main__':
     print('torch version =', torch.__version__)

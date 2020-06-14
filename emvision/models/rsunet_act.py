@@ -26,9 +26,9 @@ def set_nonlinearity(act, **act_params):
         params['inplace'] = True
 
 
-def rsunet_act(width=width, act='ReLU', **act_params):
+def rsunet_act(width=width, zfactor=None, act='ReLU', **act_params):
     set_nonlinearity(act, **act_params)
-    return RSUNet(width)
+    return RSUNet(width=width, zfactor=zfactor)
 
 
 def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
@@ -99,21 +99,25 @@ class UpConvBlock(nn.Module):
 
 
 class RSUNet(nn.Module):
-    def __init__(self, width=width):
+    def __init__(self, width=width, zfactor=None):
         super(RSUNet, self).__init__()
         assert len(width) > 1
         depth = len(width) - 1
+        if zfactor is None:
+            zfactor = [1] * depth
+        else:
+            assert depth == len(zfactor)
 
         self.iconv = ConvBlock(width[0], width[0])
 
         self.dconvs = nn.ModuleList()
         for d in range(depth):
-            self.dconvs.append(nn.Sequential(nn.MaxPool3d((1,2,2)),
+            self.dconvs.append(nn.Sequential(nn.MaxPool3d((zfactor[d],2,2)),
                                              ConvBlock(width[d], width[d+1])))
 
         self.uconvs = nn.ModuleList()
         for d in reversed(range(depth)):
-            self.uconvs.append(UpConvBlock(width[d+1], width[d]))
+            self.uconvs.append(UpConvBlock(width[d+1], width[d], up=(zfactor[d],2,2)))
 
         self.final = BNAct(width[0])
 

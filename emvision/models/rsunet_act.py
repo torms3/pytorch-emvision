@@ -8,7 +8,6 @@ from . import layers
 __all__ = ['rsunet_act']
 
 
-width = [16,32,64,128,256,512]
 nonlinearity = 'ReLU'
 params = {}
 
@@ -26,9 +25,9 @@ def set_nonlinearity(act, **act_params):
         params['inplace'] = True
 
 
-def rsunet_act(width=width, zfactor=None, act='ReLU', **act_params):
+def rsunet_act(width, zfactor=None, act='ReLU', **act_params):
     set_nonlinearity(act, **act_params)
-    return RSUNet(width=width, zfactor=zfactor)
+    return RSUNet(width, zfactor=zfactor)
 
 
 def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
@@ -99,7 +98,7 @@ class UpConvBlock(nn.Module):
 
 
 class RSUNet(nn.Module):
-    def __init__(self, width=width, zfactor=None):
+    def __init__(self, width, zfactor=None):
         super(RSUNet, self).__init__()
         assert len(width) > 1
         depth = len(width) - 1

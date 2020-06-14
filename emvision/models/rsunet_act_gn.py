@@ -8,7 +8,6 @@ from . import layers
 __all__ = ['rsunet_act_gn']
 
 
-width = [16,32,64,128,256,512]
 nonlinearity = 'ReLU'
 params = {}
 G = 16
@@ -27,9 +26,9 @@ def set_nonlinearity(act, **act_params):
         params['inplace'] = True
 
 
-def rsunet_act_gn(width=width, group=16, act='ReLU', **act_params):
+def rsunet_act_gn(width, zfactor=None, group=16, act='ReLU', **act_params):
     set_nonlinearity(act, **act_params)
-    return RSUNet(width, group)
+    return RSUNet(width, group, zfactor=zfactor)
 
 
 def conv(in_channels, out_channels, kernel_size=3, stride=1, bias=False):
@@ -100,10 +99,14 @@ class UpConvBlock(nn.Module):
 
 
 class RSUNet(nn.Module):
-    def __init__(self, width, group):
+    def __init__(self, width, group, zfactor=None):
         super(RSUNet, self).__init__()
         assert len(width) > 1
         depth = len(width) - 1
+        if zfactor is None:
+            zfactor = [1] * depth
+        else:
+            assert depth == len(zfactor)
 
         global G
         G = group
@@ -112,12 +115,12 @@ class RSUNet(nn.Module):
 
         self.dconvs = nn.ModuleList()
         for d in range(depth):
-            self.dconvs.append(nn.Sequential(nn.MaxPool3d((1,2,2)),
+            self.dconvs.append(nn.Sequential(nn.MaxPool3d((zfactor[d],2,2)),
                                              ConvBlock(width[d], width[d+1])))
 
         self.uconvs = nn.ModuleList()
         for d in reversed(range(depth)):
-            self.uconvs.append(UpConvBlock(width[d+1], width[d]))
+            self.uconvs.append(UpConvBlock(width[d+1], width[d], up=(zfactor[d],2,2)))
 
         self.final = GNAct(width[0])
 
